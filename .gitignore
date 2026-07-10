@@ -1,0 +1,74 @@
+
+
+# ==============================
+# ENV FILES (SECURITY)
+# ==============================
+.env
+.env.local
+.env.*.local
+apps/backend/.env
+apps/frontend/.env
+.crt
+.key
+# ==============================
+# DEPENDENCIES
+# ==============================
+node_modules/
+vendor/
+
+# ==============================
+# LOGS
+# ==============================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==============================
+# DATABASE FILES
+# ==============================
+*.sql
+dump/
+
+# ==============================
+# BUILD OUTPUT
+# ==============================
+dist/
+build/
+public/build/
+apps/frontend/dist/
+
+# ==============================
+# DOCKER
+# ==============================
+docker-compose.override.yml
+Dockerfile.*.swp
+.gitlab-ci-state.json
+
+# ==============================
+# KUBERNETES / CLOUD LOCAL
+# ==============================
+.kube/
+k3d/
+
+# ==============================
+# TEST & CACHE
+# ==============================
+coverage/
+.cache/
+.phpunit.result.cache
+
+# ==============================
+# OS FILES
+# ==============================
+.DS_Store
+Thumbs.db
+
+# ==============================
+# IDE
+# ==============================
+.vscode/
+.idea/
+*.swp
+*.swo
