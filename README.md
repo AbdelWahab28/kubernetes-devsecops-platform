@@ -31,7 +31,7 @@ Les objectifs principaux de cette plateforme sont :
 
 # 🏗️ Architecture globale
 
-![Architecture globale](./docs/architecture/global-architecture.png)
+![Architecture globale](./docs/screenshots/global-architecture.png)
 
 
 La plateforme est organisée autour de plusieurs couches :
