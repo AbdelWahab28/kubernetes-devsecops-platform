@@ -336,6 +336,11 @@ kubectl get pods
 
 # ✅ Résultat attendu
 
+depuis navigateur windows 
+
+https://app.insim2.local:31352 react
+https://api.insim2.local:31352 laravel
+
 À la fin de cette étape :
 
 ✔️ L'application Full Stack fonctionne localement avec Docker Compose
