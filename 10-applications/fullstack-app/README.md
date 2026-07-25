@@ -108,7 +108,7 @@ fullstack-app/
     │   ├── mysql-service.yaml
     │   ├── mysql-configmap.yaml
     │
-    └── ingress.yaml
+    └──README
 ```
 
 ---
@@ -136,11 +136,17 @@ Depuis le dossier :
 
 ```bash
 fullstack-app/
+cd frontend/
+docker build -t frontend-react:v1 .
+
+cd backend/
+docker build -t backend-laravel:v1 .
 ```
 
 Lancer les services :
 
 ```bash
+cd fullstack-app/
 docker compose up -d
 ```
 
@@ -173,7 +179,7 @@ http://localhost:3000
 Backend API :
 
 ```
-http://localhost:8000
+http://localhost:8080
 ```
 
 Base de données :
@@ -187,7 +193,7 @@ localhost:3306
 ## Arrêt des services
 
 ```bash
-docker compose down
+docker compose down -v
 ```
 
 ---
@@ -222,7 +228,9 @@ kubectl create namespace fullstack-app
 Création du stockage persistant :
 
 ```bash
-kubectl apply -f kubernetes/mysql/pvc.yaml
+kubectl apply -f 00-cluster-infra/storage/nfs-storageclass.yaml
+kubectl apply -f 00-cluster-infra/storage/nfs-pv-mysql.yaml
+kubectl apply -f 00-cluster-infra/storage/nfs-pvc-mysql.yaml
 ```
 
 Déploiement MySQL :
