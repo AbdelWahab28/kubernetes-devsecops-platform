@@ -1,0 +1,70 @@
+# ==============================
+# 🔐 CERTIFICATS & CLÉS (CRITIQUE)
+# ==============================
+*.crt
+*.key
+*.csr
+*.srl
+# ==============================
+# 🔑 ENV FILES (Laravel / React)
+# ==============================
+.env
+.env.*
+apps/backend/.env
+apps/frontend/.env
+
+# ==============================
+# 📦 DEPENDENCIES
+# ==============================
+node_modules/
+vendor/
+*.deb
+*.tar.gz
+*.zip
+# ==============================
+# 🏗️ BUILD FILES
+# ==============================
+dist/
+build/
+public/build/
+apps/frontend/dist/
+# ==============================
+# 🐳 DOCKER
+# ==============================
+Dockerfile.*.swp
+.gitlab-ci-state.json
+
+# ==============================
+# ☸️ KUBERNETES
+# ==============================
+.kube/
+k3d/
+
+# ==============================
+# 📜 LOGS
+# ==============================
+*.log
+storage/logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==============================
+# 🧪 TEST / CACHE
+# ==============================
+coverage/
+.cache/
+.phpunit.result.cache
+
+# ==============================
+# 🖥️ OS FILES
+# ==============================
+.DS_Store
+Thumbs.db
+# ==============================
+# 🔧 IDE
+# ==============================
+.vscode/
+.idea/
+*.swp
+*.swo
