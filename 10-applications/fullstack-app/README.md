@@ -91,22 +91,22 @@ fullstack-app/
 │
 └── k8s/
     │
-    ├── laravel/
-    │   ├── deployment.yaml
-    │   ├── service.yaml
-    │   └── hpa.yaml
+    ├── react/
+    │   ├── react-deployment.yaml
+    │   ├── react-service.yaml
+    │   └── react-ingress.yaml
     │
-    ├── backend/
-    │   ├── deployment.yaml
-    │   ├── service.yaml
-    │   ├── configmap.yaml
-    │   └── hpa.yaml
+    ├── laravel/
+    │   ├── laravel-deployment.yaml
+    │   ├── laravel-service.yaml
+    │   ├── laravel-ingress.yaml
+    │   └── laravel-hpa.yaml
+        └── laravel-configmap.yaml
     │
     ├── mysql/
-    │   ├── deployment.yaml
-    │   ├── service.yaml
-    │   ├── secret.yaml
-    │   └── pvc.yaml
+    │   ├── mysql-deployment.yaml
+    │   ├── mysql-service.yaml
+    │   ├── mysql-configmap.yaml
     │
     └── ingress.yaml
 ```
