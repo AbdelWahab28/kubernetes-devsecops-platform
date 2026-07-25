@@ -1,0 +1,87 @@
+services:
+  # =========================
+  # Base de données MySQL
+  # =========================
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: laravel_db
+      MYSQL_USER: laravel_user
+      MYSQL_PASSWORD: laravel_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # =========================
+  # Backend Laravel
+  # =========================
+  backend:
+    image: backend-laravel:v1
+    container_name: backend
+    restart: always
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: laravel_db
+      DB_USERNAME: laravel_user
+      DB_PASSWORD: laravel_pass
+      APP_ENV: local
+      APP_DEBUG: 'true'
+    volumes:
+      - ./backend:/var/www
+    ports:
+      - "9200:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # =========================
+  # Frontend React
+  # =========================
+  frontend:
+    image: frontend-react:v1
+    container_name: frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./frontend:/app
+    networks:
+      - app-network
+
+# =========================
+# Volumes persistants
+# =========================
+volumes:
+  db_data:
+
+# =========================
+# Réseau commun
+# =========================
+networks:
+  app-network:
+    driver: bridge
