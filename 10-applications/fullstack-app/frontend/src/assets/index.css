@@ -1,0 +1,63 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+html,body,#root{
+    height: 100%;
+}
+html{
+    position: relative;
+    scroll-behavior: smooth;
+}
+section#home{
+    height: 100%;
+    background: url("../img/ciel.jpg");
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+section#home .container .row .col-md-6 .btn{
+    width: 15rem;
+}
+section#about{
+    background: url("../img/images/gallery/gallery-6.jpg");
+    color: white;
+}
+section#contact{
+    color: white;
+    background: #00000098 url("../img/images/gallery/gallery-5.jpg");
+    background-position: center;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+
+}
+section#contact .card{
+    background: rgba(255,255,255,0.2);
+}
+section#contact .card .form-control{
+    color: whitesmoke;
+    background: transparent;
+}
+section#contact .card label::after{
+    background: transparent;
+    
+}
+#admin{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    column-gap: .1rem;
+}
+#admin .sidebar,
+#admin .adminContent{
+    position: relative;
+    height: 100%;
+}
+#admin .sidebar{
+    width: 350px;
+}
+#admin .adminContent{
+    width: inherit;
+}
