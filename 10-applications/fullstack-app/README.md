@@ -91,7 +91,7 @@ fullstack-app/
 │
 └── k8s/
     │
-    ├── frontend/
+    ├── laravel/
     │   ├── deployment.yaml
     │   ├── service.yaml
     │   └── hpa.yaml
