@@ -236,35 +236,35 @@ kubectl apply -f 00-cluster-infra/storage/nfs-pvc-mysql.yaml
 Déploiement MySQL :
 
 ```bash
-kubectl apply -f kubernetes/mysql/
+kubectl apply -f 10-applications/fullstack-app/k8s/mysql/mysql-configmap.yaml
+kubectl apply -f 10-applications/fullstack-app/k8s/mysql/mysql-deployment.yaml
+kubectl apply -f 10-applications/fullstack-app/k8s/mysql/mysql-service.yaml
 ```
 
 Vérification :
 
 ```bash
-kubectl get pods -n fullstack-app
+kubectl get pods
 ```
 
 ---
 
 # 3. Déploiement du backend Laravel
 
-Création des configurations :
-
-```bash
-kubectl apply -f kubernetes/backend/configmap.yaml
-```
-
 Déploiement :
 
 ```bash
-kubectl apply -f kubernetes/backend/
+kubectl apply -f 10-applications/fullstack-app/k8s/laravel/laravel-configmap.yaml
+kubectl apply -f 10-applications/fullstack-app/k8s/laravel/laravel-deployment.yaml
+kubectl apply -f 10-applications/fullstack-app/k8s/laravel/laravel-hpa.yaml
+kubectl apply -f 10-applications/fullstack-app/k8s/laravel/laravel-ingress.yaml
+kubectl apply -f 10-applications/fullstack-app/k8s/laravel/laravel-service.yaml
 ```
 
 Vérification :
 
 ```bash
-kubectl get deployment -n fullstack-app
+kubectl get pods
 ```
 
 ---
@@ -274,32 +274,19 @@ kubectl get deployment -n fullstack-app
 Déploiement :
 
 ```bash
-kubectl apply -f kubernetes/frontend/
+kubectl apply -f 10-applications/fullstack-app/k8s/react/react-deployment.yaml
+kubectl apply -f 10-applications/fullstack-app/k8s/react/react-ingress.yaml
+kubectl apply -f 10-applications/fullstack-app/k8s/react/react-service.yaml
 ```
 
 Vérification :
 
 ```bash
-kubectl get pods -n fullstack-app
+kubectl get pods
 ```
 
 ---
 
-# 5. Configuration Ingress
-
-L'Ingress permet d'exposer l'application via une URL unique.
-
-Déploiement :
-
-```bash
-kubectl apply -f kubernetes/ingress.yaml
-```
-
-Vérification :
-
-```bash
-kubectl get ingress -n fullstack-app
-```
 
 Architecture réseau :
 
@@ -322,44 +309,27 @@ Frontend       Backend
 
 ---
 
-# 6. Mise en place du HPA
-
-Le Horizontal Pod Autoscaler permet d'ajuster automatiquement le nombre de réplicas selon la consommation CPU.
-
-Exemple :
-
-```bash
-kubectl apply -f kubernetes/frontend/hpa.yaml
-
-kubectl apply -f kubernetes/backend/hpa.yaml
-```
-
-Vérification :
-
-```bash
-kubectl get hpa -n fullstack-app
-```
-
----
-
 # 🔎 Vérification globale
 
 Voir les ressources déployées :
 
 ```bash
-kubectl get all -n fullstack-app
+kubectl get all 
 ```
 
 Voir les services :
 
 ```bash
-kubectl get svc -n fullstack-app
+kubectl get nodes -o wide
+kubectl get svc -A
+kubectl get ingress -A
+
 ```
 
 Voir les pods :
 
 ```bash
-kubectl get pods -n fullstack-app
+kubectl get pods 
 ```
 
 ---
