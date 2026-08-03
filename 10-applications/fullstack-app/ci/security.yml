@@ -16,11 +16,11 @@ security:semgrep:frontend:
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
-        - apps/frontend/**/*
+        - frontend/**/*
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "green"
       changes:
-        - apps/frontend/**/*
+        - frontend/**/*
   script:
     - echo "🔍 Scan Semgrep FRONTEND..."
     - semgrep --config auto apps/frontend --json --output semgrep-frontend.json
@@ -42,10 +42,10 @@ security:semgrep:backend:
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
-        - apps/backend/**/*
+        - backend/**/*
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - apps/backend/**/*
+        - backend/**/*
   script:
     - echo "🔍 Scan Semgrep BACKEND..."
     - semgrep --config auto apps/backend --json --output semgrep-backend.json
@@ -69,11 +69,11 @@ security:trivy:frontend:
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
-        - apps/frontend/**/*
+        - frontend/**/*
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "green"
       changes:
-        - apps/frontend/**/*
+        - frontend/**/*
   cache:
     paths:
       - .trivycache/
@@ -94,7 +94,7 @@ security:trivy:frontend:
         $IMAGE_FRONTEND_COMMIT
 
     - echo "🔎 Scan Dockerfile FRONTEND..."
-    - trivy config --exit-code $TRIVY_EXIT_CODE apps/frontend/Dockerfile
+    - trivy config --exit-code $TRIVY_EXIT_CODE frontend/Dockerfile
 
     - echo "📦 Generate SBOM FRONTEND..."
     - trivy image --scanners vuln --format cyclonedx --output sbom-frontend.json $IMAGE_FRONTEND_COMMIT
@@ -122,10 +122,10 @@ security:trivy:backend:
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
-        - apps/backend/**/*
+        - backend/**/*
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - apps/backend/**/*
+        - backend/**/*
   cache:
     paths:
       - .trivycache/
@@ -146,7 +146,7 @@ security:trivy:backend:
         $IMAGE_BACKEND_COMMIT
 
     - echo "🔎 Scan Dockerfile BACKEND..."
-    - trivy config --exit-code $TRIVY_EXIT_CODE apps/backend/Dockerfile
+    - trivy config --exit-code $TRIVY_EXIT_CODE backend/Dockerfile
 
     - echo "📦 Generate SBOM BACKEND..."
     - trivy image --scanners vuln --format cyclonedx --output sbom-backend.json $IMAGE_BACKEND_COMMIT
@@ -173,8 +173,8 @@ security:trivy:infra:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
         - k8s/**/*
-        - apps/frontend/Dockerfile
-        - apps/backend/Dockerfile
+        - frontend/Dockerfile
+        - backend/Dockerfile
   before_script:
     - echo "⬇️ Download Trivy DB..."
     - trivy image --download-db-only
