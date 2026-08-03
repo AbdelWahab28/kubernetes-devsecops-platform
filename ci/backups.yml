@@ -22,7 +22,7 @@ deploy:backups:
     - *kube_setup
   script:
     - echo "💼 Déploiement RBAC Backup et Déploiement CronJob Backup MySQL......"
-    - kubectl apply -f 00-cluster-infra/backups/manifests/ -n $NAMESPACE_DEFAULT
+    - kubectl apply -f 00-cluster-infra/backups/ -n $NAMESPACE_DEFAULT
 
     - echo "✅ Backup déployé"
     - kubectl get cronjob -n $NAMESPACE_DEFAULT
