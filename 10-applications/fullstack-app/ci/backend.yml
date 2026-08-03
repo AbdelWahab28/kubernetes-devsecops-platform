@@ -14,16 +14,16 @@ build:backend:
     # Sur main : builder si backend a changé
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
-        - apps/backend/**/*
+        - backend/**/*
     # Sur MR aussi
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - apps/backend/**/*
+        - backend/**/*
   script:
     - echo "🔑 Login GitLab Registry..."
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
     - echo "🏗️ Build image Backend..."
-    - docker build -t $IMAGE_BACKEND_COMMIT apps/backend
+    - docker build -t $IMAGE_BACKEND_COMMIT backend
     - docker push $IMAGE_BACKEND_COMMIT
     - echo "✅ Image backend pushée → $IMAGE_BACKEND_COMMIT"
 
@@ -45,7 +45,7 @@ push:backend:
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
-        - apps/backend/**/*
+        - backend/**/*
   script:
     - echo "🔑 Login GitLab Registry..."
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
