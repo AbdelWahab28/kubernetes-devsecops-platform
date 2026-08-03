@@ -1,0 +1,187 @@
+# ============================================================
+# 🔐 SECURITY — Semgrep + Trivy
+# Scans conditionnels : chaque scan ne tourne que si
+# la partie concernée a changé
+# ============================================================
+
+# ─────────────────────────────────────────
+# SEMGREP FRONTEND
+# ─────────────────────────────────────────
+security:semgrep:frontend:
+  stage: security
+  image: returntocorp/semgrep:latest
+  needs:
+    - job: build:frontend
+      optional: true         # si frontend n'a pas été buildé, on skip
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - apps/frontend/**/*
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "green"
+      changes:
+        - apps/frontend/**/*
+  script:
+    - echo "🔍 Scan Semgrep FRONTEND..."
+    - semgrep --config auto apps/frontend --json --output semgrep-frontend.json
+  artifacts:
+    paths:
+      - semgrep-frontend.json
+    expire_in: 1 week
+  allow_failure: true
+
+# ─────────────────────────────────────────
+# SEMGREP BACKEND
+# ─────────────────────────────────────────
+security:semgrep:backend:
+  stage: security
+  image: returntocorp/semgrep:latest
+  needs:
+    - job: build:backend
+      optional: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - apps/backend/**/*
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - apps/backend/**/*
+  script:
+    - echo "🔍 Scan Semgrep BACKEND..."
+    - semgrep --config auto apps/backend --json --output semgrep-backend.json
+  artifacts:
+    paths:
+      - semgrep-backend.json
+    expire_in: 1 week
+  allow_failure: true
+
+# ─────────────────────────────────────────
+# TRIVY — IMAGE FRONTEND
+# ─────────────────────────────────────────
+security:trivy:frontend:
+  stage: security
+  image:
+    name: aquasec/trivy:0.69.3
+    entrypoint: [""]
+  needs:
+    - job: build:frontend
+      optional: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - apps/frontend/**/*
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "green"
+      changes:
+        - apps/frontend/**/*
+  cache:
+    paths:
+      - .trivycache/
+  before_script:
+    - echo "🔑 Login GitLab Registry (Trivy)..."
+    - echo "$CI_REGISTRY_PASSWORD" | trivy registry login --username "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "⬇️ Download Trivy DB..."
+    - trivy image --download-db-only
+  script:
+    - echo "🔎 Scan image FRONTEND..."
+    - trivy image
+        --exit-code $TRIVY_EXIT_CODE
+        --severity $TRIVY_SEVERITY
+        --ignore-unfixed
+        --scanners vuln,misconfig
+        --format json
+        --output trivy-frontend.json
+        $IMAGE_FRONTEND_COMMIT
+
+    - echo "🔎 Scan Dockerfile FRONTEND..."
+    - trivy config --exit-code $TRIVY_EXIT_CODE apps/frontend/Dockerfile
+
+    - echo "📦 Generate SBOM FRONTEND..."
+    - trivy image --scanners vuln --format cyclonedx --output sbom-frontend.json $IMAGE_FRONTEND_COMMIT
+  artifacts:
+    paths:
+      - trivy-frontend.json
+      - sbom-frontend.json
+    reports:
+      cyclonedx:
+        - sbom-frontend.json
+    expire_in: 1 week
+  allow_failure: true
+
+# ─────────────────────────────────────────
+# TRIVY — IMAGE BACKEND
+# ─────────────────────────────────────────
+security:trivy:backend:
+  stage: security
+  image:
+    name: aquasec/trivy:0.69.3
+    entrypoint: [""]
+  needs:
+    - job: build:backend
+      optional: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - apps/backend/**/*
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - apps/backend/**/*
+  cache:
+    paths:
+      - .trivycache/
+  before_script:
+    - echo "🔑 Login GitLab Registry (Trivy)..."
+    - echo "$CI_REGISTRY_PASSWORD" | trivy registry login --username "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "⬇️ Download Trivy DB..."
+    - trivy image --download-db-only
+  script:
+    - echo "🔎 Scan image BACKEND..."
+    - trivy image
+        --exit-code $TRIVY_EXIT_CODE
+        --severity $TRIVY_SEVERITY
+        --ignore-unfixed
+        --scanners vuln,misconfig
+        --format json
+        --output trivy-backend.json
+        $IMAGE_BACKEND_COMMIT
+
+    - echo "🔎 Scan Dockerfile BACKEND..."
+    - trivy config --exit-code $TRIVY_EXIT_CODE apps/backend/Dockerfile
+
+    - echo "📦 Generate SBOM BACKEND..."
+    - trivy image --scanners vuln --format cyclonedx --output sbom-backend.json $IMAGE_BACKEND_COMMIT
+  artifacts:
+    paths:
+      - trivy-backend.json
+      - sbom-backend.json
+    reports:
+      cyclonedx:
+        - sbom-backend.json
+    expire_in: 1 week
+  allow_failure: true
+
+# ─────────────────────────────────────────
+# TRIVY — K8S MANIFESTS + FILESYSTEM
+# Tourne si k8s/ change OU si c'est un commit sur main
+# ─────────────────────────────────────────
+security:trivy:infra:
+  stage: security
+  image:
+    name: aquasec/trivy:0.69.3
+    entrypoint: [""]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - k8s/**/*
+        - apps/frontend/Dockerfile
+        - apps/backend/Dockerfile
+  before_script:
+    - echo "⬇️ Download Trivy DB..."
+    - trivy image --download-db-only
+  script:
+    - echo "🔎 Scan Kubernetes manifests..."
+    - trivy config --exit-code $TRIVY_EXIT_CODE k8s/
+
+    - echo "🔎 Scan filesystem (deps + secrets)..."
+    - trivy fs --exit-code $TRIVY_EXIT_CODE --severity $TRIVY_SEVERITY --scanners vuln,secret .
+  allow_failure: true
