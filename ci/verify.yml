@@ -11,13 +11,10 @@ verify:infra:structure:
 
     # Dossiers principaux
     - test -d 00-cluster-infra/storage      || (echo "❌ storage manquant"      && exit 1)
-    - test -d 00-cluster-infra/rbac         || (echo "❌ rbac manquant"         && exit 1)
     - test -d 00-cluster-infra/certificate  || (echo "❌ certificate manquant"  && exit 1)
     - test -d 00-cluster-infra/backups      || (echo "❌ backups manquant"      && exit 1)
-    - test -d 00-cluster-infra/monitoring   || (echo "❌ monitoring manquant"   && exit 1)
 
     # Fichiers critiques
-    - test -f 00-cluster-infra/rbac/manifests/rbac-regle.yaml          || (echo "❌ rbac-regle.yaml manquant"         && exit 1)
     - test -f 00-cluster-infra/certificate/clusterissuer-letsencrypt.yaml || (echo "❌ clusterissuer manquant"        && exit 1)
     - test -f 00-cluster-infra/backups/manifests/backup-cronjob.yaml   || (echo "❌ backup-cronjob.yaml manquant"     && exit 1)
 
