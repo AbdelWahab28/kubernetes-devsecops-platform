@@ -1,0 +1,68 @@
+# ============================================================
+# ⚛️  FRONTEND — Build + Push (React / Vite)
+# ============================================================
+
+# ─────────────────────────────────────────
+# BUILD
+# ─────────────────────────────────────────
+build:frontend:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  rules:
+    # Sur main : builder image BLUE
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - apps/frontend/**/*
+    # Sur green : builder image GREEN
+    - if: $CI_COMMIT_BRANCH == "green"
+      changes:
+        - apps/frontend/**/*
+  script:
+    - echo "🔑 Login GitLab Registry..."
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "🏗️ Build image Frontend..."
+    - docker build -t $IMAGE_FRONTEND_COMMIT apps/frontend
+    - docker push $IMAGE_FRONTEND_COMMIT
+    - echo "✅ Image frontend pushée → $IMAGE_FRONTEND_COMMIT"
+
+# ─────────────────────────────────────────
+# PUSH TAG STABLE
+# ─────────────────────────────────────────
+push:frontend:
+  stage: push
+  image: docker:27
+  services:
+    - docker:27-dind
+  needs:
+    - job: build:frontend
+      optional: false
+    - job: security:trivy:frontend
+      optional: false
+    - job: security:semgrep:frontend
+      optional: false
+  rules:
+    # Sur main : push tag stable BLUE
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - apps/frontend/**/*
+    # Sur green : push tag stable GREEN
+    - if: $CI_COMMIT_BRANCH == "green"
+      changes:
+        - apps/frontend/**/*
+  script:
+    - echo "🔑 Login GitLab Registry..."
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "📤 Tag et push image stable frontend..."
+    - docker pull $IMAGE_FRONTEND_COMMIT
+    - |
+      if [ "$CI_COMMIT_BRANCH" == "green" ]; then
+        docker tag $IMAGE_FRONTEND_COMMIT $CI_REGISTRY_IMAGE/$APP_NAME_FRONTEND:green-react
+        docker push $CI_REGISTRY_IMAGE/$APP_NAME_FRONTEND:green-react
+        echo "✅ Image GREEN pushée → green-latest"
+      else
+        docker tag $IMAGE_FRONTEND_COMMIT $IMAGE_FRONTEND
+        docker push $IMAGE_FRONTEND
+        echo "✅ Image BLUE pushée → $IMAGE_FRONTEND"
+      fi
