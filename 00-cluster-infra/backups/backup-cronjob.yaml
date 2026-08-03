@@ -1,0 +1,94 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mysql-backup-daily
+spec:
+  schedule: "0 2 * * *"
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 7200
+
+      template:
+        spec:
+          serviceAccountName: mysql-backup-sa
+          restartPolicy: Never
+
+          containers:
+            - name: mysql-backup
+              image: mysql:8.0
+
+              securityContext:
+                runAsUser: 0
+
+              env:
+                - name: MYSQL_HOST
+                  value: "mysql-service"
+
+                - name: MYSQL_USER
+                  valueFrom:
+                    configMapKeyRef:
+                      name: mysql-config
+                      key: MYSQL_USER
+
+                - name: MYSQL_DATABASE
+                  valueFrom:
+                    configMapKeyRef:
+                      name: mysql-config
+                      key: MYSQL_DATABASE
+
+                - name: MYSQL_ROOT_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: mysql-secrets
+                      key: mysql-root-password
+
+                - name: MYSQL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: mysql-secrets
+                      key: mysql-insi-password
+
+              command: ["/bin/sh"]
+              args:
+                - -c
+                - |
+                  set -e
+
+                  DATE=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="/backup/mysql-insim2-${DATE}.sql.gz"
+
+                  echo "🚀 Backup started: $(date)"
+
+                  mysql -h $MYSQL_HOST -u $MYSQL_USER -p$MYSQL_PASSWORD \
+                    --connect-timeout=10 -e "SELECT 1;" || exit 1
+
+                  mysqldump -h $MYSQL_HOST -u $MYSQL_USER -p$MYSQL_PASSWORD \
+                    --single-transaction --routines --triggers --events \
+                    --all-databases > /tmp/backup.sql
+
+                  gzip /tmp/backup.sql
+                  mv /tmp/backup.sql.gz "$BACKUP_FILE"
+
+                  echo "✅ Backup OK: $BACKUP_FILE"
+
+              volumeMounts:
+                - name: nfs-backup
+                  mountPath: /backup
+
+              resources:
+                requests:
+                  memory: "256Mi"
+                  cpu: "100m"
+                limits:
+                  memory: "512Mi"
+                  cpu: "250m"
+
+          volumes:
+            - name: nfs-backup
+              persistentVolumeClaim:
+                claimName: mysql-backup-pvc

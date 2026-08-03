@@ -1,0 +1,38 @@
+# ============================================================
+# 🏗️ ORCHESTRATEUR — Pipeline Infrastructure Kubernetes
+# Gère : Storage, RBAC, Certificates, Backups, Monitoring
+# Chaque composant ne se déploie QUE si ses fichiers changent
+# ============================================================
+
+stages:
+  - verify
+  - deploy-storage
+  - deploy-rbac
+  - deploy-certs
+  - deploy-backups
+  - deploy-monitoring
+
+# ─────────────────────────────────────────
+# VARIABLES GLOBALES
+# ─────────────────────────────────────────
+variables:
+  NAMESPACE_DEFAULT: default
+  NAMESPACE_MONITORING: monitoring
+  INFRA_DIR: 00-cluster-infra
+
+default:
+  tags:
+    - kube-runner
+  before_script:
+    - echo "🏗️ Infrastructure Pipeline Start — commit $CI_COMMIT_SHORT_SHA"
+
+# ─────────────────────────────────────────
+# INCLUSION DES PIPELINES SÉPARÉS
+# ─────────────────────────────────────────
+include:
+  - local: ci/verify.yml
+  - local: ci/storage.yml
+  - local: ci/rbac.yml
+  - local: ci/certificates.yml
+  - local: ci/backups.yml
+  - local: ci/monitoring.yml

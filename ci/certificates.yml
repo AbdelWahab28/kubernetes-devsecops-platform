@@ -1,0 +1,31 @@
+# ============================================================
+# 🔒 CERTIFICATES — ClusterIssuer Let's Encrypt + Certs TLS
+# Ne se déploie QUE si les fichiers certificate changent
+# ============================================================
+
+.kube_setup: &kube_setup
+  - mkdir -p /tmp/kube
+  - echo "$KUBE_CONFIG_PROD" | base64 -d > /tmp/kube.yaml
+  - export KUBECONFIG=/tmp/kube.yaml
+  - kubectl get nodes
+
+deploy:certificates:
+  stage: deploy-certs
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - 00-cluster-infra/certificate/**/*
+  before_script:
+    - *kube_setup
+  script:
+    - echo "🔒 Déploiement ClusterIssuer Let's Encrypt et  Déploiement Certificats TLS......"
+    - kubectl apply -f 00-cluster-infra/certificate/
+
+    - echo "✅ Certificats déployés"
+    - kubectl get clusterissuer
+    - kubectl get certificate -A
+  environment:
+    name: production

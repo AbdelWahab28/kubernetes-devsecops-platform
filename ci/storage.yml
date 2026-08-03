@@ -1,0 +1,52 @@
+# ============================================================
+# 💾 STORAGE — PersistentVolumes et PersistentVolumeClaims NFS
+# Ne se déploie QUE si les fichiers storage changent
+# ============================================================
+
+.kube_setup: &kube_setup
+  - mkdir -p /tmp/kube
+  - echo "$KUBE_CONFIG_PROD" | base64 -d > /tmp/kube.yaml
+  - export KUBECONFIG=/tmp/kube.yaml
+  - kubectl get nodes
+
+deploy:storage:
+  stage: deploy-storage
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - 00-cluster-infra/storage/**/*
+  before_script:
+    - *kube_setup
+  script:
+    - echo "💾 Déploiement Storage (PV/PVC NFS)..."
+
+    # StorageClass
+    - kubectl apply -f 00-cluster-infra/storage/nfs-storageclass.yaml
+
+    # PersistentVolumes
+    - echo "📦 Application des PersistentVolumes..."
+    - kubectl apply -f 00-cluster-infra/storage/nfs-pv-mysql.yaml
+    - kubectl apply -f 00-cluster-infra/storage/nfs-pv-mysql-react-node.yaml
+    - kubectl apply -f 00-cluster-infra/storage/nfs-pv-grafana.yaml
+    - kubectl apply -f 00-cluster-infra/storage/nfs-pv-loki.yaml
+    - kubectl apply -f 00-cluster-infra/storage/nfs-pv-prometheus.yaml
+    - kubectl apply -f 00-cluster-infra/storage/nfs-pv-backup.yaml
+
+    # PersistentVolumeClaims
+    - echo "📦 Application des PersistentVolumeClaims..."
+    - kubectl apply -f 00-cluster-infra/storage/nfs-pvc-mysql.yaml          -n $NAMESPACE_DEFAULT
+    - kubectl apply -f 00-cluster-infra/storage/nfs-pvc-mysql-react-node.yaml -n react-node
+    - kubectl apply -f 00-cluster-infra/storage/nfs-pvc-grafana.yaml         -n $NAMESPACE_MONITORING
+    - kubectl apply -f 00-cluster-infra/storage/nfs-pvc-loki.yaml            -n $NAMESPACE_MONITORING
+    - kubectl apply -f 00-cluster-infra/storage/nfs-pvc-prometheus.yaml      -n $NAMESPACE_MONITORING
+    - kubectl apply -f 00-cluster-infra/storage/nfs-pvc-backup.yaml          -n $NAMESPACE_DEFAULT
+
+    - echo "✅ Storage déployé"
+    - kubectl get pv
+    - kubectl get pvc -n $NAMESPACE_DEFAULT
+    - kubectl get pvc -n $NAMESPACE_MONITORING
+  environment:
+    name: production
