@@ -7,17 +7,14 @@
 stages:
   - verify
   - deploy-storage
-  - deploy-rbac
   - deploy-certs
   - deploy-backups
-  - deploy-monitoring
 
 # ─────────────────────────────────────────
 # VARIABLES GLOBALES
 # ─────────────────────────────────────────
 variables:
   NAMESPACE_DEFAULT: default
-  NAMESPACE_MONITORING: monitoring
   INFRA_DIR: 00-cluster-infra
 
 default:
@@ -32,7 +29,5 @@ default:
 include:
   - local: ci/verify.yml
   - local: ci/storage.yml
-  - local: ci/rbac.yml
   - local: ci/certificates.yml
   - local: ci/backups.yml
-  - local: ci/monitoring.yml
