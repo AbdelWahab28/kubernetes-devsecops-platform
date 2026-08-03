@@ -1,0 +1,56 @@
+# ============================================================
+# 🎯 ORCHESTRATEUR PRINCIPAL — inclut les pipelines séparés
+# ============================================================
+
+stages:
+  - verify
+  - build
+  - security
+  - push
+  - deploy
+  - rollback
+
+# ─────────────────────────────────────────
+# VARIABLES GLOBALES
+# ─────────────────────────────────────────
+variables:
+  APP_NAME_BACKEND: laravelapp
+  APP_NAME_FRONTEND: reactapp
+  APP_VERSION: "1.0.0"
+
+  IMAGE_BACKEND: $CI_REGISTRY_IMAGE/$APP_NAME_BACKEND:$APP_VERSION
+  IMAGE_BACKEND_COMMIT: $CI_REGISTRY_IMAGE/$APP_NAME_BACKEND:$APP_VERSION-$CI_COMMIT_SHORT_SHA
+
+  IMAGE_FRONTEND: $CI_REGISTRY_IMAGE/$APP_NAME_FRONTEND:$APP_VERSION
+  IMAGE_FRONTEND_COMMIT: $CI_REGISTRY_IMAGE/$APP_NAME_FRONTEND:$APP_VERSION-$CI_COMMIT_SHORT_SHA
+
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+  NAMESPACE: default
+  PV_PATCH: '{"spec":{"claimRef": null}}'
+  green_version: '{"spec":{"selector":{"app":"react","version":"green"}}}'
+
+  TRIVY_CACHE_DIR: ".trivycache"
+  TRIVY_EXIT_CODE: "0"
+  TRIVY_SEVERITY: "HIGH,CRITICAL"
+
+# ─────────────────────────────────────────
+# TAG PAR DÉFAUT
+# ─────────────────────────────────────────
+default:
+  tags:
+    - kube-runner
+  before_script:
+    - echo "🔹 CI Pipeline Start — commit $CI_COMMIT_SHORT_SHA"
+
+# ─────────────────────────────────────────
+# INCLUSION DES PIPELINES SÉPARÉS
+# ─────────────────────────────────────────
+include:
+  - local: ci/verify.yml
+  - local: ci/frontend.yml
+  - local: ci/backend.yml
+  - local: ci/security.yml
+  - local: ci/deploy.yml
+  - local: ci/rollback.yml
