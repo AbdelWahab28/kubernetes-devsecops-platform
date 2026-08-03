@@ -10,11 +10,11 @@ verify_structure:
     - if: $CI_COMMIT_BRANCH == "green"
   script:
     - echo "🔹 Vérification structure projet..."
-    - test -d apps/frontend            || (echo "❌ apps/frontend manquant"          && exit 1)
-    - test -d apps/backend             || (echo "❌ apps/backend manquant"           && exit 1)
+    - test -d frontend            || (echo "❌ apps/frontend manquant"          && exit 1)
+    - test -d backend             || (echo "❌ apps/backend manquant"           && exit 1)
     - test -d k8s                      || (echo "❌ dossier k8s manquant"            && exit 1)
-    - test -f apps/frontend/Dockerfile || (echo "❌ Dockerfile frontend manquant"   && exit 1)
-    - test -f apps/backend/Dockerfile  || (echo "❌ Dockerfile backend manquant"    && exit 1)
+    - test -f frontend/Dockerfile || (echo "❌ Dockerfile frontend manquant"   && exit 1)
+    - test -f backend/Dockerfile  || (echo "❌ Dockerfile backend manquant"    && exit 1)
     - test -f ci/frontend.yml          || (echo "❌ ci/frontend.yml manquant"        && exit 1)
     - test -f ci/backend.yml           || (echo "❌ ci/backend.yml manquant"         && exit 1)
     - test -f ci/security.yml          || (echo "❌ ci/security.yml manquant"        && exit 1)
