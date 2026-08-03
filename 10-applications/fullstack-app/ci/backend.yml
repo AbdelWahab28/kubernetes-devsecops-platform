@@ -1,0 +1,56 @@
+# ============================================================
+# 🐘 BACKEND — Build + Push (Laravel / PHP)
+# ============================================================
+
+# ─────────────────────────────────────────
+# BUILD
+# ─────────────────────────────────────────
+build:backend:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  rules:
+    # Sur main : builder si backend a changé
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - apps/backend/**/*
+    # Sur MR aussi
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - apps/backend/**/*
+  script:
+    - echo "🔑 Login GitLab Registry..."
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "🏗️ Build image Backend..."
+    - docker build -t $IMAGE_BACKEND_COMMIT apps/backend
+    - docker push $IMAGE_BACKEND_COMMIT
+    - echo "✅ Image backend pushée → $IMAGE_BACKEND_COMMIT"
+
+# ─────────────────────────────────────────
+# PUSH TAG STABLE
+# ─────────────────────────────────────────
+push:backend:
+  stage: push
+  image: docker:27
+  services:
+    - docker:27-dind
+  needs:
+    - job: build:backend
+      optional: false
+    - job: security:trivy:backend
+      optional: false
+    - job: security:semgrep:backend
+      optional: false
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - apps/backend/**/*
+  script:
+    - echo "🔑 Login GitLab Registry..."
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "📤 Tag et push image stable backend..."
+    - docker pull $IMAGE_BACKEND_COMMIT
+    - docker tag $IMAGE_BACKEND_COMMIT $IMAGE_BACKEND
+    - docker push $IMAGE_BACKEND
+    - echo "✅ Image BLUE pushée → $IMAGE_BACKEND"
