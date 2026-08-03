@@ -29,19 +29,11 @@ deploy:storage:
     # PersistentVolumes
     - echo "📦 Application des PersistentVolumes..."
     - kubectl apply -f 00-cluster-infra/storage/nfs-pv-mysql.yaml
-    - kubectl apply -f 00-cluster-infra/storage/nfs-pv-mysql-react-node.yaml
-    - kubectl apply -f 00-cluster-infra/storage/nfs-pv-grafana.yaml
-    - kubectl apply -f 00-cluster-infra/storage/nfs-pv-loki.yaml
-    - kubectl apply -f 00-cluster-infra/storage/nfs-pv-prometheus.yaml
     - kubectl apply -f 00-cluster-infra/storage/nfs-pv-backup.yaml
 
     # PersistentVolumeClaims
     - echo "📦 Application des PersistentVolumeClaims..."
     - kubectl apply -f 00-cluster-infra/storage/nfs-pvc-mysql.yaml          -n $NAMESPACE_DEFAULT
-    - kubectl apply -f 00-cluster-infra/storage/nfs-pvc-mysql-react-node.yaml -n react-node
-    - kubectl apply -f 00-cluster-infra/storage/nfs-pvc-grafana.yaml         -n $NAMESPACE_MONITORING
-    - kubectl apply -f 00-cluster-infra/storage/nfs-pvc-loki.yaml            -n $NAMESPACE_MONITORING
-    - kubectl apply -f 00-cluster-infra/storage/nfs-pvc-prometheus.yaml      -n $NAMESPACE_MONITORING
     - kubectl apply -f 00-cluster-infra/storage/nfs-pvc-backup.yaml          -n $NAMESPACE_DEFAULT
 
     - echo "✅ Storage déployé"
