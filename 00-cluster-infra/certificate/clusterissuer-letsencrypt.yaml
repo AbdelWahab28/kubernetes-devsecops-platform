@@ -4,5 +4,3 @@ metadata:
   name: selfsigned-issuer
 spec:
   selfSigned: {}
-# test pipeline mer. 01 juil. 2026 12:46:49 EAT
-# test pipeline INFRA mer. 01 juil. 2026 13:02:12 EAT
