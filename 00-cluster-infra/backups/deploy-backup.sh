@@ -33,13 +33,13 @@ echo "✅ Secrets et ConfigMap OK"
 # 2️⃣ Déploiement RBAC
 # ---------------------------------------------------
 echo "📋 Déploiement RBAC..."
-kubectl apply -f manifests/rbac-backup.yaml
+kubectl apply -f rbac-backup.yaml
 
 # ---------------------------------------------------
 # 3️⃣ Déploiement CronJob
 # ---------------------------------------------------
 echo "📦 Déploiement CronJob..."
-kubectl apply -f manifests/backup-cronjob.yaml -n "$NAMESPACE"
+kubectl apply -f backup-cronjob.yaml -n "$NAMESPACE"
 
 # ---------------------------------------------------
 # 4️⃣ Vérification CronJob
