@@ -14,16 +14,16 @@ build:frontend:
     # Sur main : builder image BLUE
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
-        - apps/frontend/**/*
+        - frontend/**/*
     # Sur green : builder image GREEN
     - if: $CI_COMMIT_BRANCH == "green"
       changes:
-        - apps/frontend/**/*
+        - frontend/**/*
   script:
     - echo "🔑 Login GitLab Registry..."
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
     - echo "🏗️ Build image Frontend..."
-    - docker build -t $IMAGE_FRONTEND_COMMIT apps/frontend
+    - docker build -t $IMAGE_FRONTEND_COMMIT frontend
     - docker push $IMAGE_FRONTEND_COMMIT
     - echo "✅ Image frontend pushée → $IMAGE_FRONTEND_COMMIT"
 
@@ -46,11 +46,11 @@ push:frontend:
     # Sur main : push tag stable BLUE
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
-        - apps/frontend/**/*
+        - frontend/**/*
     # Sur green : push tag stable GREEN
     - if: $CI_COMMIT_BRANCH == "green"
       changes:
-        - apps/frontend/**/*
+        - frontend/**/*
   script:
     - echo "🔑 Login GitLab Registry..."
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
