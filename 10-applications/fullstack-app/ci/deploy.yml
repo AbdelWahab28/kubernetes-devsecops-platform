@@ -73,3 +73,61 @@ deploy:blue:backend:
     - kubectl get pvc,pv -n $NAMESPACE
   environment:
     name: production
+# ─────────────────────────────────────────
+# DEPLOY GREEN — FRONTEND (manuel)
+# ─────────────────────────────────────────
+deploy:green:frontend:
+  stage: deploy
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  before_script:
+    - *kube_setup
+  rules:
+    - if: $CI_COMMIT_BRANCH == "green"
+      when: manual
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+  script:
+    - echo "🟢 Déploiement GREEN FRONTEND..."
+    - kubectl apply -f ../deployment-strategies/Blue-Green/ -n $NAMESPACE
+    - kubectl rollout status deployment/react-insi-m2-green -n $NAMESPACE --timeout=600s
+
+    - echo "⏳ Vérification readiness pods GREEN..."
+    - kubectl wait --for=condition=ready pod -l app=react,version=green --timeout=120s -n $NAMESPACE
+
+    - echo "🔍 Vérification que le service pointe vers BLUE..."
+    - CURRENT_SELECTOR=$(kubectl get service react-service -n $NAMESPACE -o jsonpath='{.spec.selector.version}' 2>/dev/null || echo "none")
+    - echo "Selector actuel → $CURRENT_SELECTOR"
+
+    - echo "🔀 Switch du service vers GREEN..."
+    - kubectl patch service react-service -n $NAMESPACE -p '{"spec":{"selector":{"app":"react","version":"green"}}}'
+    - echo "✅ Trafic basculé vers GREEN frontend"
+    - kubectl get pods -n $NAMESPACE -l app=react
+  environment:
+    name: production
+
+# ─────────────────────────────────────────
+# DEPLOY CANARY — FRONTEND (manuel)
+# 10% du trafic vers la version canary
+# ─────────────────────────────────────────
+deploy:canary:frontend:
+  stage: deploy
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  before_script:
+    - *kube_setup
+  rules:
+    - if: $CI_COMMIT_BRANCH == "canary"
+      when: manual
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+  script:
+    - echo "🟡 Déploiement CANARY FRONTEND (10% trafic)..."
+    - kubectl apply -f ../deployment-strategies/Canary/ -n $NAMESPACE
+    - kubectl rollout status deployment/react-insi-m2-canary -n $NAMESPACE --timeout=600s
+    - echo "✅ Canary déployé — 10% du trafic vers CANARY"
+    - kubectl get pods -n $NAMESPACE -l app=react
+  environment:
+    name: production
