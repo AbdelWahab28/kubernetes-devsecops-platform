@@ -53,3 +53,4 @@ include:
   - local: ci/backend.yml
   - local: ci/security.yml
   - local: ci/deploy.yml
+  - local: ci/rollback.yml

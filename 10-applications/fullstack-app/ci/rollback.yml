@@ -1,0 +1,71 @@
+# ============================================================
+# 🔄 ROLLBACK — Manuel uniquement
+# Frontend : rebascule service vers BLUE (Blue/Green)
+# Backend  : rollout undo (RollingUpdate)
+# ============================================================
+
+.kube_setup: &kube_setup
+  - mkdir -p /tmp/kube
+  - echo "$KUBE_CONFIG_PROD" | base64 -d > /tmp/kube.yaml
+  - export KUBECONFIG=/tmp/kube.yaml
+
+# ─────────────────────────────────────────
+# ROLLBACK FRONTEND — retour vers BLUE
+# ─────────────────────────────────────────
+rollback:frontend:
+  stage: rollback
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  before_script:
+    - *kube_setup
+  script:
+    - echo "🔄 Rollback FRONTEND vers BLUE..."
+    - kubectl patch service react-service -n $NAMESPACE -p '{"spec":{"selector":{"app":"react","version":"blue"}}}'
+    - echo "✅ Trafic rebasculé vers BLUE"
+    - kubectl get service react-service -n $NAMESPACE -o jsonpath='{.spec.selector}'
+    - kubectl get pods -n $NAMESPACE -l app=react
+  when: manual
+  environment:
+    name: production
+
+# ─────────────────────────────────────────
+# ROLLBACK BACKEND seul
+# ─────────────────────────────────────────
+rollback:backend:
+  stage: rollback
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  before_script:
+    - *kube_setup
+  script:
+    - echo "🔄 Rollback BACKEND..."
+    - kubectl rollout undo deployment/laravel-insi-m2 -n $NAMESPACE
+    - kubectl rollout status deployment/laravel-insi-m2 -n $NAMESPACE
+    - echo "✅ Rollback backend terminé"
+  when: manual
+  environment:
+    name: production
+
+# ─────────────────────────────────────────
+# ROLLBACK COMPLET (frontend + backend)
+# ─────────────────────────────────────────
+rollback:all:
+  stage: rollback
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  before_script:
+    - *kube_setup
+  script:
+    - echo "🔄 Rollback complet (frontend + backend)..."
+    - echo "🔵 Retour vers BLUE frontend..."
+    - kubectl patch service react-service -n $NAMESPACE -p '{"spec":{"selector":{"app":"react","version":"blue"}}}'
+    - echo "🔄 Rollback backend..."
+    - kubectl rollout undo deployment/laravel-insi-m2 -n $NAMESPACE
+    - kubectl rollout status deployment/laravel-insi-m2 -n $NAMESPACE
+    - echo "✅ Rollback complet terminé"
+  when: manual
+  environment:
+    name: production
