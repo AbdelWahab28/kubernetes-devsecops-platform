@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loki
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loki
+  template:
+    metadata:
+      labels:
+        app: loki
+    spec:
+      securityContext:
+        runAsUser: 10001   # UID Loki
+        runAsGroup: 10001  # GID Loki
+        fsGroup: 10001     # permet d’écrire dans le volume
+      containers:
+      - name: loki
+        image: grafana/loki:3.1.1
+        args:
+          - "-config.file=/etc/loki/loki.yaml"
+        ports:
+          - containerPort: 3100
+            name: http
+        volumeMounts:
+          - name: config
+            mountPath: /etc/loki
+          - name: storage
+            mountPath: /loki
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: loki-config
+        - name: storage
+          persistentVolumeClaim:
+            claimName: loki-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki
+  namespace: monitoring
+spec:
+  type: NodePort
+  selector:
+    app: loki
+  ports:
+    - port: 3100
+      targetPort: 3100
+      nodePort: 30100
