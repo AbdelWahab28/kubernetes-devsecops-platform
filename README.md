@@ -1,3 +1,13 @@
+![Kubernetes](https://img.shields.io/badge/Kubernetes-%23326CE5.svg?logo=kubernetes\&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-%232496ED.svg?logo=docker\&logoColor=white)
+![GitLab CI](https://img.shields.io/badge/GitLab%20CI-%23FC6D26.svg?logo=gitlab\&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-%235835CC.svg?logo=terraform\&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-%23E6522C.svg?logo=prometheus\&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-%23F46800.svg?logo=grafana\&logoColor=white)
+![Trivy](https://img.shields.io/badge/Trivy-%2319054A.svg?logo=aqua\&logoColor=white)
+![Semgrep](https://img.shields.io/badge/Semgrep-%23000000.svg?logo=semgrep\&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 # ☸️ Kubernetes DevSecOps Platform
 
 ## Conception et mise en place d'une plateforme Kubernetes DevSecOps pour le déploiement sécurisé d'applications Full Stack
