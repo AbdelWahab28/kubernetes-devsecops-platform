@@ -1,0 +1,108 @@
+---
+# ===============================
+# 1. ADMIN CLUSTER (DevOps)
+# ===============================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-global-binding
+subjects:
+- kind: User
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+# ===============================
+# 2. ROLE PROFESSEUR
+# ===============================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: professeur-role
+  namespace: professeurs
+rules:
+# gestion applications
+- apiGroups: ["apps"]
+  resources: ["deployments","replicasets"]
+  verbs: ["get","list","watch","create","update","patch","delete"]
+# gestion pods
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get","list","watch","delete"]
+# accès logs
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get"]
+# gestion services
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get","list","watch","create","update","delete"]
+# gestion configmaps
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get","list","watch","create","update","delete"]
+
+---
+# ===============================
+# 3. ROLE ETUDIANT (DEVELOPPEUR)
+# ===============================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: etudiant-role
+  namespace: etudiants
+rules:
+# voir les pods
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get","list","watch"]
+# voir logs
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get"]
+# voir services
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get","list","watch"]
+# déployer applications simples
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["create","get","list","watch","update"]
+# configmaps pour configuration app
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["create","get","list","update"]
+
+---
+# 5. ROLEBINDING PROFESSEUR
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prof-binding
+  namespace: professeurs
+subjects:
+- kind: User
+  name: prof1
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: professeur-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# 6. ROLEBINDING ÉTUDIANT
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: etudiant-binding
+  namespace: etudiants
+subjects:
+- kind: User
+  name: etudiant1
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: etudiant-role
+  apiGroup: rbac.authorization.k8s.io

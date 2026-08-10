@@ -1,0 +1,30 @@
+# ============================================================
+# 🔐 RBAC — Roles, RoleBindings, ClusterRoles
+# Ne se déploie QUE si les fichiers rbac changent
+# ============================================================
+
+.kube_setup: &kube_setup
+  - mkdir -p /tmp/kube
+  - echo "$KUBE_CONFIG_PROD" | base64 -d > /tmp/kube.yaml
+  - export KUBECONFIG=/tmp/kube.yaml
+  - kubectl get nodes
+
+deploy:rbac:
+  stage: deploy-rbac
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - 00-cluster-infra/rbac/manifests/**/*
+  before_script:
+    - *kube_setup
+  script:
+    - echo "🔐 Déploiement règles RBAC..."
+    - kubectl apply -f 00-cluster-infra/rbac/manifests/rbac-regle.yaml
+    - echo "✅ RBAC déployé"
+    - kubectl get clusterroles | grep insi || true
+    - kubectl get rolebindings -n $NAMESPACE_DEFAULT || true
+  environment:
+    name: production
