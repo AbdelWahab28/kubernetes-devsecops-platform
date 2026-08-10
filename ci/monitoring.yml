@@ -1,0 +1,42 @@
+# ============================================================
+# 📈 MONITORING — Prometheus + Grafana + Loki + Promtail
+# Manuel uniquement — ne tourne pas à chaque commit
+# Se déploie aussi automatiquement si les manifests changent
+# ============================================================
+
+.kube_setup: &kube_setup
+  - mkdir -p /tmp/kube
+  - echo "$KUBE_CONFIG_PROD" | base64 -d > /tmp/kube.yaml
+  - export KUBECONFIG=/tmp/kube.yaml
+  - kubectl get nodes
+  - kubectl get ns $NAMESPACE_MONITORING || kubectl create ns $NAMESPACE_MONITORING
+
+deploy:monitoring:
+  stage: deploy-monitoring
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  rules:
+    # Automatique si les manifests monitoring changent
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - 00-cluster-infra/monitoring/**/*
+    # Manuel depuis GitLab à tout moment
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+  before_script:
+    - *kube_setup
+  script:
+    - echo "📈 Déploiement Prometheus..."
+    - kubectl apply -f 00-cluster-infra/monitoring/prometheus/ -n $NAMESPACE_MONITORING
+
+    - echo "📊 Déploiement Grafana..."
+    - kubectl apply -f 00-cluster-infra/monitoring/grafana/ -n $NAMESPACE_MONITORING
+
+    - echo "📦 Déploiement Loki + Promtail..."
+    - kubectl apply -f 00-cluster-infra/monitoring/loki-promtail/ -n $NAMESPACE_MONITORING
+
+    - echo "✅ Monitoring stack déployée"
+    - kubectl get pods -n $NAMESPACE_MONITORING
+  environment:
+    name: production
