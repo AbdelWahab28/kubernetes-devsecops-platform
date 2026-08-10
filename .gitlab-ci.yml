@@ -9,12 +9,14 @@ stages:
   - deploy-storage
   - deploy-certs
   - deploy-backups
+  - deploy-monitoring
 
 # ─────────────────────────────────────────
 # VARIABLES GLOBALES
 # ─────────────────────────────────────────
 variables:
   NAMESPACE_DEFAULT: default
+  NAMESPACE_MONITORING: monitoring
   INFRA_DIR: 00-cluster-infra
 
 default:
@@ -31,3 +33,4 @@ include:
   - local: ci/storage.yml
   - local: ci/certificates.yml
   - local: ci/backups.yml
+  - local: ci/monitoring.yml
